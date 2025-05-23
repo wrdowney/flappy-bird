@@ -1,6 +1,10 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 `sdl2-config --cflags`
-LDFLAGS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf -lSDL2_mixer # Add other SDL2 libraries as needed (e.g., image, ttf, mixer)
+CFLAGS = -Wall -Wextra -std=c11
+# Adjust include paths if GLFW headers are not in the default location
+# CFLAGS += -I/usr/local/include 
+LDFLAGS = -lglfw -lGL -lm -ldl -lpthread # Common libraries needed for GLFW on Linux
+# Adjust lib paths if GLFW library is not in the default location
+# LDFLAGS += -L/usr/local/lib
 
 SRCS = main.c
 OBJS = $(SRCS:.c=.o)
