@@ -1,88 +1,90 @@
 #include <GLFW/glfw3.h>
+#include <math.h>
 #include <stdio.h>
-#include <stdlib.h> // For exit
 
-// OpenGL headers (if you plan to use OpenGL for rendering, which is common with GLFW)
-// On Linux, these are often found in /usr/include/GL
-// You might need to install development packages like libglu1-mesa-dev and mesa-common-dev
-#if defined(__APPLE__)
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
+void drawCircle(float cx, float cy, float r, int num_segments)
+{
+    printf("Drawing circle at (%f, %f) with radius %f and %d segments\n", cx, cy, r, num_segments);
+    float theta = (3.1415926 * 2) / (float)num_segments;
+    float tangetial_factor = tanf(theta);//calculate the tangential factor 
 
+    float radial_factor = cosf(theta);//calculate the radial factor 
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+    float x = r;//we start at angle = 0 
 
-void error_callback(int error, const char* description) {
-    fprintf(stderr, "Error: %s\n", description);
+    float y = 0;
+    glLineWidth(2);
+    glBegin(GL_LINE_LOOP);
+    for (int ii = 0; ii < num_segments; ii++)
+    {
+        glVertex2f(x + cx, y + cy);//output vertex 
+
+        //calculate the tangential vector 
+        //remember, the radial vector is (x, y) 
+        //to get the tangential vector we flip those coordinates and negate one of them 
+
+        float tx = -y;
+        float ty = x;
+
+        //add the tangential vector 
+
+        x += tx * tangetial_factor;
+        y += ty * tangetial_factor;
+
+        //correct using the radial factor 
+
+        x *= radial_factor;
+        y *= radial_factor;
+    }
+    glEnd();
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-        // Handle jump
-        printf("Space pressed!\n");
-    }
-}
+int main(void)
+{
+    GLFWwindow* window;
 
-int main(int argc, char* args[]) {
-    GLFWwindow* window = NULL;
+    /* Initialize the library */
+    if (!glfwInit())
+        return -1;
 
-    glfwSetErrorCallback(error_callback);
-
-    // Initialize GLFW
-    if (!glfwInit()) {
-        printf("GLFW could not initialize!\n");
-        return 1;
-    }
-
-    // Hint GLFW to use OpenGL 3.3 Core Profile (optional, but good practice)
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    // Create window
-    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Flappy Bird with GLFW", NULL, NULL);
-    if (window == NULL) {
-        printf("Window could not be created!\n");
+    /* Create a windowed mode window and its OpenGL context */
+    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    if (!window)
+    {
         glfwTerminate();
-        return 1;
+        return -1;
     }
 
+    /* Make the window's context current */
     glfwMakeContextCurrent(window);
-    glfwSetKeyCallback(window, key_callback);
 
-    // Vsync (optional)
-    glfwSwapInterval(1);
+    // Set up orthographic projection to match window size
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, 640, 0, 480, -1, 1); // left, right, bottom, top, near, far
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
-    // Game loop
-    while (!glfwWindowShouldClose(window)) {
-        // Handle events
-        glfwPollEvents();
-
-        // --- Game logic would go here ---
-
-
-        // Clear screen (using OpenGL)
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black
+    /* Loop until the user closes the window */
+    while (!glfwWindowShouldClose(window))
+    {
+        /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // --- Rendering would go here (using OpenGL) ---
+        glColor3f(0.0, 0.5, 0.5);
 
+        /* Draw a circle */
+        drawCircle(320, 240, 100, 360);
 
-        // Swap buffers
+        /* Swap front and back buffers */
         glfwSwapBuffers(window);
+
+        /* Poll for and process events */
+        glfwPollEvents();
     }
 
-    // Destroy window
-    glfwDestroyWindow(window);
-
-    // Terminate GLFW
     glfwTerminate();
-
     return 0;
 }
+
+
