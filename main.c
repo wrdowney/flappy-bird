@@ -13,6 +13,9 @@ Ball *arr = NULL;
 int num_balls = 0;
 float radius = 10;
 
+/**
+ * Callback to be executed on mouse buttion action
+ */
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {

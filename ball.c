@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include "ball.h"
 
+/**
+ * Check for collisions between a subject ball and any ball within an array of 
+ * balls.
+ * @param ball Subject ball to check for collisions.
+ * @param ballArr Array of balls to check for collisions against subject ball.
+ */
 void check_collisions(Ball *ball, Ball **ballArr) {
     int len = sizeof(ballArr) / sizeof(ballArr[0]);
     printf("%d", len);
@@ -17,7 +23,7 @@ void check_collisions(Ball *ball, Ball **ballArr) {
 }
 
 /**
- * Draws the broder of a circle by repeatedly drawing line segments between 
+ * Draws the border of a circle by repeatedly drawing line segments between 
  * two consecutive points which lie along the edge of the circle.
  * @param ball Ball which will be drawn inside the window.
  */
@@ -44,6 +50,11 @@ void draw_ball(Ball ball)
     glEnd();
 }
 
+/**
+ * Calculates the euclidean distances between the center of two balls.
+ * @param b1 First ball to use in distance calculation. 
+ * @param b2 Second ball to use in distance calculation.
+ */
 float distance(Ball b1, Ball b2) {
     // d = sqrt((x2 - x1)^2 + (y2 - y1)^2)
     float dx = b2.x - b1.x;
@@ -52,6 +63,9 @@ float distance(Ball b1, Ball b2) {
     return sqrtf((dx * dx) + (dy * dy));
 }
 
+/**
+ * Initializes a given ball with the given properties.
+ */
 void init_ball(Ball *ball, int id, float x, float y, float rad, int num_segments, float mass) {
     ball->id = id;
     ball->x = x;
@@ -63,6 +77,11 @@ void init_ball(Ball *ball, int id, float x, float y, float rad, int num_segments
     ball->last_updated_timestamp = glfwGetTime();
 }
 
+/**
+ * Update the position of a given ball for the current time.
+ * @param ball Ball to update position. 
+ * @param window GLFW window containing the ball.
+ */
 void update_ball_pos(Ball *ball, GLFWwindow *window) {    
     int win_width, win_height;
     double timestamp = glfwGetTime();
@@ -71,13 +90,13 @@ void update_ball_pos(Ball *ball, GLFWwindow *window) {
 
     glfwGetWindowSize(window, &win_width, &win_height);
     float lower_bound = ball->rad + LINE_WIDTH;
-    float acceleration = GRAVITATIONAL_CONSTANT * ball->mass;
+    float acceleration = GRAVITATIONAL_CONSTANT * ball->mass; // a = G * m
 
     if (ball->y < lower_bound) {
         ball->y = lower_bound;
         ball->velocity *= -1;
     } else {
-        ball->velocity += (acceleration * dt);
+        ball->velocity += (acceleration * dt); // v = v0 + (a * delta(t))
     }
     ball->y += ball->velocity * dt;
 }
