@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11
+CFLAGS = -Wall -Wextra -std=c11 -O3 -ffast-math
 
 # macOS: Use brew's include and lib paths for GLFW
 CFLAGS += -I/opt/homebrew/include
@@ -12,7 +12,7 @@ EXECUTABLE = game
 all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJS)
-	$(CC) $(OBJS) -o $(EXECUTABLE) $(LDFLAGS)
+	$(CC) $(OBJS) -o $(EXECUTABLE) $(LDFLAGS) $(CFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@ 

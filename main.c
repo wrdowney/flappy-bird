@@ -1,40 +1,37 @@
+#define GL_SILENCE_DEPRECATION
+
 #include <GLFW/glfw3.h>
 #include <math.h>
 #include <stdio.h>
 
-void drawCircle(float cx, float cy, float r, int num_segments)
+#define LINE_WIDTH 2
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
+
+/*
+Draws a circle by repeatedly drawing line segments between two points which are 
+lie along the edge of the circle.
+*/
+void drawCircle(float x, float y, float rad, int numSegments)
 {
-    printf("Drawing circle at (%f, %f) with radius %f and %d segments\n", cx, cy, r, num_segments);
-    float theta = (3.1415926 * 2) / (float)num_segments;
-    float tangetial_factor = tanf(theta);//calculate the tangential factor 
+    float theta = (M_PI * 2) / (float)numSegments;
+    float tangentialFactor = tanf(theta), radialFactor = cosf(theta);
+    float dx = rad, dy = 0;
 
-    float radial_factor = cosf(theta);//calculate the radial factor 
-
-    float x = r;//we start at angle = 0 
-
-    float y = 0;
-    glLineWidth(2);
+    glLineWidth(LINE_WIDTH);
     glBegin(GL_LINE_LOOP);
-    for (int ii = 0; ii < num_segments; ii++)
+    for (int i = 0; i < numSegments; i++)
     {
-        glVertex2f(x + cx, y + cy);//output vertex 
+        glVertex2f(dx + x, dy + y);
 
-        //calculate the tangential vector 
-        //remember, the radial vector is (x, y) 
-        //to get the tangential vector we flip those coordinates and negate one of them 
+        float tx = -dy;
+        float ty = dx;
 
-        float tx = -y;
-        float ty = x;
+        dx += tx * tangentialFactor;
+        dy += ty * tangentialFactor;
 
-        //add the tangential vector 
-
-        x += tx * tangetial_factor;
-        y += ty * tangetial_factor;
-
-        //correct using the radial factor 
-
-        x *= radial_factor;
-        y *= radial_factor;
+        dx *= radialFactor;
+        dy *= radialFactor;
     }
     glEnd();
 }
@@ -43,48 +40,59 @@ int main(void)
 {
     GLFWwindow* window;
 
-    /* Initialize the library */
     if (!glfwInit())
         return -1;
 
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Simulation", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
 
-    /* Make the window's context current */
+    float dy = 0, velocity = 0.0, acceleration = 9.8;
+
     glfwMakeContextCurrent(window);
 
     // Set up orthographic projection to match window size
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, 640, 0, 480, -1, 1); // left, right, bottom, top, near, far
+    glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1); 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    /* Loop until the user closes the window */
+    double lastTimestamp = 0.0;
+
+    float originX = WINDOW_WIDTH / 2, originY = WINDOW_HEIGHT / 2;
+    float x = originX, y = originY;
+
     while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
         glColor3f(0.0, 0.5, 0.5);
 
-        /* Draw a circle */
-        drawCircle(320, 240, 100, 360);
+        if (y > 7) {
 
-        /* Swap front and back buffers */
+            double currTimestamp = glfwGetTime();
+            double dt = currTimestamp - lastTimestamp;
+            lastTimestamp = currTimestamp;
+
+            velocity += (acceleration * dt); // v = a * delta(t)
+            dy -= (velocity * dt) * 10; // delta(y) = velocity * delta(t)
+            y += dy;
+        }
+
+        if (y < 7) {
+            y = 7;
+        }
+
+        drawCircle(x, y, 10, 360);
+        
         glfwSwapBuffers(window);
-
-        /* Poll for and process events */
         glfwPollEvents();
     }
 
     glfwTerminate();
     return 0;
 }
-
-
