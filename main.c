@@ -1,39 +1,17 @@
 #define GL_SILENCE_DEPRECATION
 
 #include <GLFW/glfw3.h>
-#include <math.h>
 #include <stdio.h>
+#include "ball.h"
 
-#define LINE_WIDTH 2
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
-/*
-Draws a circle by repeatedly drawing line segments between two points which are 
-lie along the edge of the circle.
-*/
-void drawCircle(float x, float y, float rad, int numSegments)
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-    float theta = (M_PI * 2) / (float)numSegments;
-    float tangentialFactor = tanf(theta), radialFactor = cosf(theta);
-    float dx = rad, dy = 0;
-
-    glLineWidth(LINE_WIDTH);
-    glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < numSegments; i++)
-    {
-        glVertex2f(dx + x, dy + y);
-
-        float tx = -dy;
-        float ty = dx;
-
-        dx += tx * tangentialFactor;
-        dy += ty * tangentialFactor;
-
-        dx *= radialFactor;
-        dy *= radialFactor;
-    }
-    glEnd();
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        printf("clicked");
+        fflush(stdout);
 }
 
 int main(void)
@@ -50,8 +28,6 @@ int main(void)
         return -1;
     }
 
-    float dy = 0, velocity = 0.0, acceleration = 9.8;
-
     glfwMakeContextCurrent(window);
 
     // Set up orthographic projection to match window size
@@ -61,33 +37,24 @@ int main(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    double lastTimestamp = 0.0;
 
-    float originX = WINDOW_WIDTH / 2, originY = WINDOW_HEIGHT / 2;
-    float x = originX, y = originY;
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
+    float origin_x = WINDOW_WIDTH / 2, origin_y = WINDOW_HEIGHT / 2;
+    float x = origin_x, y = origin_y;
+    float radius = 10;
+
+    Ball b;
+    init_ball(&b, x, y, radius, 360, 10);
+    
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glColor3f(0.0, 0.5, 0.5);
 
-        if (y > 7) {
-
-            double currTimestamp = glfwGetTime();
-            double dt = currTimestamp - lastTimestamp;
-            lastTimestamp = currTimestamp;
-
-            velocity += (acceleration * dt); // v = a * delta(t)
-            dy -= (velocity * dt) * 10; // delta(y) = velocity * delta(t)
-            y += dy;
-        }
-
-        if (y < 7) {
-            y = 7;
-        }
-
-        drawCircle(x, y, 10, 360);
+        update_ball_pos(&b, window);
+        draw_ball(b);
         
         glfwSwapBuffers(window);
         glfwPollEvents();
