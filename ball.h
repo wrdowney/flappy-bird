@@ -8,6 +8,7 @@
 #include <math.h>
 
 typedef struct Ball {
+    int id;
     float x;
     float y;
     float rad;
@@ -17,9 +18,13 @@ typedef struct Ball {
     double last_updated_timestamp;
 } Ball;
 
+void check_collisions(Ball *ball, Ball **ballArr);
+
 void draw_ball(Ball ball);
 
-void init_ball(Ball *ball, float x, float y, float rad, int num_segments, float mass);
+float distance(Ball b1, Ball b2);
+
+void init_ball(Ball *ball, int id, float x, float y, float rad, int num_segments, float mass);
 
 void update_ball_pos(Ball *ball, GLFWwindow *window);
 

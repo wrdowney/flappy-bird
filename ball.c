@@ -1,6 +1,21 @@
 #include <stdio.h>
 #include "ball.h"
 
+void check_collisions(Ball *ball, Ball **ballArr) {
+    int len = sizeof(ballArr) / sizeof(ballArr[0]);
+    printf("%d", len);
+    for (int i = 0; i < len; i++) {
+        // d < r1 + r2 indicates a collision between the two balls
+        if (ball->id != ballArr[i]->id) { // ignore the same ball
+            float dist = distance(*ball, *ballArr[i]);
+            if (dist < (ball->rad + ballArr[i]->rad)) {
+                printf("Collision!!!!\n");
+                fflush(stdout);
+            }
+        }
+    } 
+}
+
 /**
  * Draws the broder of a circle by repeatedly drawing line segments between 
  * two consecutive points which lie along the edge of the circle.
@@ -29,7 +44,16 @@ void draw_ball(Ball ball)
     glEnd();
 }
 
-void init_ball(Ball *ball, float x, float y, float rad, int num_segments, float mass) {
+float distance(Ball b1, Ball b2) {
+    // d = sqrt((x2 - x1)^2 + (y2 - y1)^2)
+    float dx = b2.x - b1.x;
+    float dy = b2.y - b1.y;
+
+    return sqrtf((dx * dx) + (dy * dy));
+}
+
+void init_ball(Ball *ball, int id, float x, float y, float rad, int num_segments, float mass) {
+    ball->id = id;
     ball->x = x;
     ball->y = y;
     ball->rad = rad;
