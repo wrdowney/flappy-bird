@@ -7,11 +7,27 @@
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
+Ball arr[20];
+int num_balls = 0;
+float radius = 10;
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-        printf("clicked");
-        fflush(stdout);
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        if (num_balls < 20) {
+            double x, y;
+
+
+            glfwGetCursorPos(window, &x, &y);
+
+            // cursor position is relative to top left corner, but we draw
+            // relative to bottom left corner, so flip the y axis.
+            y = WINDOW_HEIGHT - y; 
+
+            init_ball(&arr[num_balls], x, y, radius, 360, 10);
+            num_balls++;
+        }
+    }
 }
 
 int main(void)
@@ -40,22 +56,16 @@ int main(void)
 
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-    float origin_x = WINDOW_WIDTH / 2, origin_y = WINDOW_HEIGHT / 2;
-    float x = origin_x, y = origin_y;
-    float radius = 10;
-
-    Ball b;
-    init_ball(&b, x, y, radius, 360, 10);
-    
     while (!glfwWindowShouldClose(window))
     {
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         glColor3f(0.0, 0.5, 0.5);
-
-        update_ball_pos(&b, window);
-        draw_ball(b);
-        
+        for (int i = 0; i < num_balls; i++) {
+            update_ball_pos(&arr[i], window);
+            draw_ball(arr[i]);
+        }
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
